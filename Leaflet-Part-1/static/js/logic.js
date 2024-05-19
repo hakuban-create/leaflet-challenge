@@ -16,7 +16,7 @@ fetch(queryUrl)
     L.geoJSON(data, {
       pointToLayer: function (feature, latlng) {
         var color = getColor(feature.geometry.coordinates[2]);
-        var radius = feature.properties.mag * 6;
+        var radius = feature.properties.mag * 4;
 
         return L.circleMarker(latlng, {
           color: "grey",
@@ -24,8 +24,9 @@ fetch(queryUrl)
           fillOpacity: 0.75,
           radius: radius,
         }).bindPopup(
-          `<h3>${feature.properties.place}</h3>
+          `<p>Location: ${feature.properties.place}</p>
           <hr><p>Magnitude: ${feature.properties.mag}</p>
+          <hr><p>Depth: ${feature.geometry.coordinates[2]}</p>
           <hr><p>Timestamp: ${new Date(feature.properties.time)}</p>`
         );
       },
@@ -45,3 +46,24 @@ function getColor(depth) {
     ? "#ddf402"
     : "#a4f600";
 }
+
+var legend = L.control({ position: "bottomright" });
+
+legend.onAdd = function (map) {
+  var div = L.DomUtil.create("div", "info legend"),
+    depths = [-10, 10, 30, 50, 70, 90],
+    labels = [];
+
+  for (var i = 0; i < depths.length; i++) {
+    div.innerHTML +=
+      '<i style="background:' +
+      getColor(depths[i] + 1) +
+      '"></i> ' +
+      depths[i] +
+      (depths[i + 1] ? "&ndash;" + depths[i + 1] + "<br>" : "+");
+  }
+
+  return div;
+};
+
+legend.addTo(map);
